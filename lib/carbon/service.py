@@ -110,7 +110,7 @@ def createBaseService(config):
 
 
 def createCacheService(config):
-    from carbon.cache import MetricCache
+    from carbon.cache import MetricCache, UDPForward
     from carbon.conf import settings
     from carbon.protocols import CacheManagementHandler
 
@@ -129,6 +129,11 @@ def createCacheService(config):
 
     service = WriterService()
     service.setServiceParent(root_service)
+
+    # Turn on UDP forwarding
+    if settings.ENABLE_UDP_FORWARDING:
+      udp_forward = UDPForward()
+      events.metricReceived.addHandler(udp_forward.sendDatapoint)
 
     if settings.USE_FLOW_CONTROL:
       events.cacheFull.addHandler(events.pauseReceivingMetrics)
